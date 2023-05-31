@@ -108,6 +108,7 @@ class UImanager:
         for index, thread in enumerate(self.threads):
             thread.join()
     
+
     # add return back 
     def thread_test_thingy2(self, objectQueue, s):
         if not s:
@@ -143,6 +144,7 @@ class UImanager:
                     self.thread_test_thingy2(objectQueue.childObjects, 0)
       
 
+    # non threaded collision checking 
     def check_mouse_collisions(self, objectQueue=None):
         if objectQueue == None:
             objectQueue = self.objectQueue
@@ -170,7 +172,9 @@ class UImanager:
                     return self.check_mouse_collisions(object.childObjects)
 
 
-# Is how group together ui objects 
+
+
+# This is how ui objects are grouped together, this is where the screen is initialised i.e ui manager 
 class Container:
     def __init__(self, ui):
         self.ui = ui
@@ -229,6 +233,7 @@ class UIobjects:
                 print(self.identifier)
         return False
 
+
 class Widget(UIobjects):
     def __init__(self, ui, *args, **kwargs):
         super(Widget, self).__init__(*args, **kwargs)
@@ -273,9 +278,7 @@ class Widget(UIobjects):
                 return False
         return True
             
-            
         
-
     def create_collision_boxes(self):
         pass
 
@@ -345,25 +348,4 @@ class Tab(Label):
                 # self.child.object.x = self.object.x + translateX(self.angleCos, 20)
                 # self.child.object.y = self.object.y + translateY(self.angleSin, 20)
                 # self.child.bgColour = (0,255,0)
-
-
-'''
-class Container:
-    def __init__(self, objects, displayType, scrollBar=0):
-class Widget:
-    def __init__(self, textInformation, position, font, bg_colour, static , ui, uiCollidable=0,
-     isTab=0, boarderImage=None, text_colour=(255, 255, 255), children=[], identifier=None, size=(200,200),
-      visible=1, sizeToText=0, isScrollBar = False, scrollBarSide='R', isDropDown=False):
-class Button:
-    def __init__(self, text, position, font, bg_colour, image, event, eventArguments, ui,
-     text_colour=(255, 255, 255), parentWidget=None, buttonId=None):
-class DropDownMenu:
-    def __init__(self, widget, placementDirection, entities, height, width, ui):
-class ScrollBar:
-    def __init__(self, height, data, position, side):
-class Tab:
-    def __init__(self, position, width,height, widget, icon, bg_colour, tabs):
-class Tabs:
-    def __init__(self, widgets, icons, text, side, ui, tab_bg_colour=(173,255,47)):
-'''
 
