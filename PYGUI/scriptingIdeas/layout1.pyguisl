@@ -1,0 +1,6 @@
+identifier // this is used to group containers together such as HUD and INVENTORY would be identifiers 
+  window size : x, y 
+  
+  canvas
+
+identifier

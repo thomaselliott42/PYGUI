@@ -172,8 +172,6 @@ class UImanager:
                     return self.check_mouse_collisions(object.childObjects)
 
 
-
-
 # This is how ui objects are grouped together, this is where the screen is initialised i.e ui manager 
 class Container:
     def __init__(self, ui):
@@ -234,9 +232,9 @@ class UIobjects:
         return False
 
 
-class Widget(UIobjects):
+class Canvas(UIobjects):
     def __init__(self, ui, *args, **kwargs):
-        super(Widget, self).__init__(*args, **kwargs)
+        super(Canvas, self).__init__(*args, **kwargs)
         self.ui = ui
 
         if self.parent:
