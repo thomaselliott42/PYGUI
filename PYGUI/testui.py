@@ -3,7 +3,7 @@ import os
 import pygame
 from pygame.locals import *
 
-from ui.ui import UImanager, Canvas, Label, ScrollBar, Tab, Container, translateX
+from ui.ui import UImanager, Canvas, Label, ScrollBar, Tab, Container, Button
 
 pygame.init()
 
@@ -16,27 +16,32 @@ clock = pygame.time.Clock()
 
 pygame.display.set_caption('UI TEST')
 
-screen1 = UImanager(screen, debug=False)
+screen1 = UImanager(screen, debug=True)
 
 # 1
-canvas1 = Canvas(screen1, (100,100), isVisible=True,)
-label1 = Label( '!', (255,0,0), parent=canvas1, identifier='!')
-label2 = Label('World', (255,0,0), parent=label1, identifier='World')
-Label('Hello', (255,0,0), parent=label2, identifier='Hello')
-ScrollBar(canvas1, bgColour=(255,250,250), objectSize=(5,10))
-Canvas(screen1, parent=canvas1, objectSize=(10,10), objectPosition=(150,150), bgColour=(255,0,0))
+# canvas1 = Canvas(screen1, (100,100), isVisible=True,)
+# label1 = Label( '!', (255,0,0), parent=canvas1, identifier='!')
+# label2 = Label('World', (255,0,0), parent=label1, identifier='World')
+# Label('Hello', (255,0,0), parent=label2, identifier='Hello')
+# ScrollBar(canvas1, bgColour=(255,250,250), objectSize=(5,10))
+# Canvas(screen1, parent=canvas1, objectSize=(10,10), objectPosition=(150,150), bgColour=(255,0,0))
 
 # 2
-canvas2 = Canvas(screen1, isMoveable=False, objectPosition=(400,100))
-label4 = Label( '!', (255,0,0), parent=canvas2, identifier='!')
+# canvas2 = Canvas(screen1, isMoveable=False, objectPosition=(400,100))
+# label4 = Label( '!', (255,0,0), parent=canvas2, identifier='!')
+# label5 = Label('World', (255,0,0), parent=label4, identifier='World')
+# label6 = Label('Hello', (255,0,0), parent=label5, identifier='Hello')
+# ScrollBar(canvas2, bgColour=(255,250,250), objectSize=(5,10))
+
+
+label4 = Label( '!', (255,0,0), ui=screen1, identifier='!', objectPosition=(100, 130))
 label5 = Label('World', (255,0,0), parent=label4, identifier='World')
 label6 = Label('Hello', (255,0,0), parent=label5, identifier='Hello')
-ScrollBar(canvas2, bgColour=(255,250,250), objectSize=(5,10))
 
+b = Button(event=None, eventArgs=None, child=label4, text='Howdy', textColour=(255,0,0), ui=screen1, objectPosition=(100,90))
 
-
-
-
+# container = Container(screen1)
+# container.childObjects.append(canvas1)
 
 run = True
 while run:

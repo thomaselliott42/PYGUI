@@ -114,34 +114,41 @@ class UImanager:
         if not s:
             objectQueue.reverse()
             for object in objectQueue:
-                for type in object.objects:
-                    for obj in object.objects[type]:
-                        if type == 'rectangle':
-                            if object.check_mouse_collision(obj):
-                                if self.debug:
-                                    object.bgColour = (170, 255, 0)
-                                self.cA = object 
-                            else:
-                                if self.debug:
-                                    object.bgColour = object.ogColour
-                        
-                if object.childObjects:
-                    self.thread_test_thingy2(object.childObjects, 0)
+                if object.isVisible:
+                    for type in object.objects:
+                        for obj in object.objects[type]:
+                            if type == 'rectangle':
+                                if object.check_mouse_collision(obj):
+                                    if self.debug:
+                                        object.bgColour = (170, 255, 0)
+                                    self.cA = object 
+                                else:
+                                    if self.debug:
+                                        object.bgColour = object.ogColour
+                            
+                    if object.childObjects:
+                        self.thread_test_thingy2(object.childObjects, 0)
+                               
+                # if object.childObjects:
+                #     self.thread_test_thingy2(object.childObjects, 0)
         else:
             self.numbParentObjs += 1
             for type in objectQueue.objects:
-                for obj in objectQueue.objects[type]:
-                    if type == 'rectangle':
-                        if objectQueue.check_mouse_collision(obj):
-                            if self.debug:
-                                objectQueue.bgColour = (170, 255, 0)
-                            self.cA = objectQueue 
-                        else:
-                            if self.debug:
-                                objectQueue.bgColour = objectQueue.ogColour
+                if objectQueue.isVisible:
+                    for obj in objectQueue.objects[type]:
+                        if type == 'rectangle':
+                            if objectQueue.check_mouse_collision(obj):
+                                if self.debug:
+                                    objectQueue.bgColour = (170, 255, 0)
+                                self.cA = objectQueue 
+                            else:
+                                if self.debug:
+                                    objectQueue.bgColour = objectQueue.ogColour
                         
-                if objectQueue.childObjects:
-                    self.thread_test_thingy2(objectQueue.childObjects, 0)
+                    if objectQueue.childObjects:
+                        self.thread_test_thingy2(objectQueue.childObjects, 0)
+                # if objectQueue.childObjects:
+                #     self.thread_test_thingy2(objectQueue.childObjects, 0)
       
 
     # non threaded collision checking 
@@ -182,7 +189,7 @@ class Container:
 
 # Parent Class for every UI object 
 class UIobjects:
-    def __init__(self, objectPosition=(0,0), objectSize=(200,200), bgColour=(20, 50, 120),
+    def __init__(self, objectPosition=(0,0), anchour=None, objectSize=(200,200), bgColour=(20, 50, 120),
                  font=pygame.font.Font(None, 16), parent=None, isVisible=True, isMoveable=True, identifier=None):
         self.object = pygame.Rect(objectPosition, objectSize)
 
@@ -326,6 +333,8 @@ class ScrollBar(UIobjects):
         return obj.collidepoint(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
 
 
+
+
 class Tab(Label):
     def __init__(self, child, *args, **kwargs):
         super(Tab, self).__init__(*args, **kwargs)
@@ -346,4 +355,31 @@ class Tab(Label):
                 # self.child.object.x = self.object.x + translateX(self.angleCos, 20)
                 # self.child.object.y = self.object.y + translateY(self.angleSin, 20)
                 # self.child.bgColour = (0,255,0)
+
+
+''' 
+NOT HOW BUTOTN IS GOING TO WORK 
+'''
+class Button(Tab):
+    def __init__(self, event, eventArgs, *args, **kwargs):
+        super(Button, self).__init__(*args, **kwargs)
+        
+    
+    def set_visible(self) -> None:
+        if self.child.isVisible:
+            self.child.isVisible = False
+        else:
+            self.child.isVisible = True
+    
+
+    def get_action(self):
+        for event in pygame.event.get():
+    
+            if pygame.mouse.get_pressed()[0]:
+                self.set_visible()
+  
+
+             
+
+    
 
