@@ -16,7 +16,7 @@ clock = pygame.time.Clock()
 
 pygame.display.set_caption('UI TEST')
 
-screen1 = UImanager(screen, debug=True)
+screen1 = UImanager(screen, debug=True, threadedCollisionDetection=True)
 
 
 '''
@@ -40,7 +40,7 @@ def positon(*labels):
             label.object.x = label.parent.object.topleft[0]
             label.object.y = label.parent.object.topleft[1] - label.object.h
 
-canvas2 = Canvas(screen1, isMoveable=False, objectPosition=(400,100), isVisible=True)
+canvas2 = Canvas(screen1, isMoveable=True, objectPosition=(400,100), isVisible=True)
 label4 = Label( '!', (255,0,0), parent=canvas2, identifier='!')
 label5 = Label('World', (255,0,0), parent=label4, identifier='World')
 label6 = Label('Hello', (255,0,0), parent=label5, identifier='Hello')
@@ -63,7 +63,7 @@ while run:
 
     pygame.display.set_caption(f'UI TEST FPS({round(clock.get_fps())}) Container Objects({screen1.numbContainers}) Parent Objects({screen1.numbParentObjs}) Child Objects({screen1.numbChildObjs})')
 
-    screen1.threaded_cycle()
+    screen1.update_ui()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:  

@@ -20,12 +20,13 @@ def translateY(angle, radius):
     return math.sin(angle*-1)* radius
 
 class UImanager:
-    def __init__(self, screen, debug=False):
+    def __init__(self, screen, threadedCollisionDetection=True, debug=False):
         self.objectQueue = []
         self.debug = debug
         self.renderer = Renderer(screen)
         self.screen = screen
         self.actionInProgress = False
+        self.threadedCollisionDetection = threadedCollisionDetection
 
         # DEBUG
         self.numbParentObjs = 0
@@ -33,25 +34,20 @@ class UImanager:
         self.numbChildObjs = 0
 
 
-    # Renders and Checks for Collision
-    def ui_cycle(self):
-        self.numbChildObjs = 0
-        self.numbParentObjs = 0
-        self.numbContainers = 0
-        if self.objectQueue:
-            self.ui_render()
-            return self.ui_collisions()
-
-
-    # Only Renders 
+    # Calls the render cycle  
     def ui_render(self):
         self.numbChildObjs = 0
         self.render_cycle()
     
 
-    # Only Checks for collision, not threaded 
+    # Calls the collision cycle
     def ui_collisions(self):
-        return self.check_mouse_collisions()
+        if self.threadedCollisionDetection:
+            self.check_mouse_collision_threaded()
+        else:
+            self.numbParentObjs = 0
+            self.numbContainers = 0
+            self.check_mouse_object_collision()
 
 
     ''' 
@@ -92,9 +88,10 @@ class UImanager:
                 for type in object.objects:
                     self.render_objects(object, type)
                 self.check_child_objects(self.render_cycle, object)
-               
+    
 
-    def threaded_cycle(self):
+    # Renders and Checks the objects for mouse Collision
+    def update_ui(self):
         self.cA = None
         self.numbChildObjs = 0
 
@@ -103,19 +100,20 @@ class UImanager:
             if self.actionInProgress:
                 self.actionInProgress = self.lastCA.get_action()
             else:
-                self.thread_test_thingy()
+                self.ui_collisions()
+
             if self.cA:
                 self.actionInProgress = self.cA.get_action()
                 self.lastCA = self.cA
 
 
-    def thread_test_thingy(self):
+    def check_mouse_collision_threaded(self):
         self.threads = []
         self.numbParentObjs = 0
         self.numbContainers = 0
 
         for object in self.objectQueue:
-            x = threading.Thread(target=self.need_name, args=(object,))
+            x = threading.Thread(target=self.check_mouse_object_collision_threaded, args=(object,))
             self.threads.append(x)
             x.start()
 
@@ -123,7 +121,7 @@ class UImanager:
             thread.join()
     
 
-    def thread_test_thingy2(self, objectQueue):
+    def check_mouse_child_collision_threaded(self, objectQueue):
         objectQueue.reverse()
         for object in objectQueue:
             if object.isVisible:
@@ -137,15 +135,15 @@ class UImanager:
                             elif self.debug:
                                 object.bgColour = object.ogColour
 
-                self.check_child_objects(self.thread_test_thingy2, object)
+                self.check_child_objects(self.check_mouse_child_collision_threaded, object)
         objectQueue.reverse()
 
 
-    def need_name(self, object):
+    def check_mouse_object_collision_threaded(self, object):
         if object.__class__ == Container:
             if object.isVisible:
                 self.numbContainers += 1
-                self.check_child_objects(self.thread_test_thingy2, object)
+                self.check_child_objects(self.check_mouse_child_collision_threaded, object)
         else:
             if object.isVisible:
                 self.numbParentObjs += 1
@@ -159,35 +157,37 @@ class UImanager:
                             elif self.debug:
                                 object.bgColour = object.ogColour
                                 
-                    self.check_child_objects(self.thread_test_thingy2, object)
+                    self.check_child_objects(self.check_mouse_child_collision_threaded, object)
 
 
     # non threaded collision checking 
-    def check_mouse_collisions(self, objectQueue=None):
+    def check_mouse_object_collision(self, objectQueue=None):
         if objectQueue == None:
             objectQueue = self.objectQueue
 
         objectQueue.reverse()
         
-        if not objectQueue:
-            return objectQueue
-        else:
-            for object in objectQueue:
+        for object in objectQueue:
+            if object.__class__ == Container:
                 if object.isVisible:
-                    for type in object.objects:
-                        for obj in object.objects[type]:
-                            if type == 'rectangle':
-                                if object.check_mouse_collision(obj):
-                                    if self.debug:
-                                        object.bgColour = (170, 255, 0)
-                                    object.get_action()
-                                    return object 
-                                else:
-                                    if self.debug:
-                                        object.bgColour = (20, 50, 120)
-                        
-                if object.childObjects:
-                    return self.check_mouse_collisions(object.childObjects)
+                    self.numbContainers += 1
+                    self.check_child_objects(self.check_mouse_object_collision, object)
+            elif object.isVisible:
+                for type in object.objects:
+                    for obj in object.objects[type]:
+                        if type == 'rectangle':
+                            if object.check_mouse_collision(obj):
+                                if self.debug:
+                                    object.bgColour = (170, 255, 0)
+                                self.cA = object 
+                            else:
+                                if self.debug:
+                                    object.bgColour = (20, 50, 120)
+            self.check_child_objects(self.check_mouse_object_collision, object)
+
+        objectQueue.reverse()
+
+          
 
 
 # This is how ui objects are grouped together, this is where the screen is initialised i.e ui manager 
