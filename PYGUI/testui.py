@@ -18,36 +18,50 @@ pygame.display.set_caption('UI TEST')
 
 screen1 = UImanager(screen, debug=True)
 
-# 1
-# canvas1 = Canvas(screen1, (100,100), isVisible=True,)
-# label1 = Label( '!', (255,0,0), parent=canvas1, identifier='!')
-# label2 = Label('World', (255,0,0), parent=label1, identifier='World')
-# Label('Hello', (255,0,0), parent=label2, identifier='Hello')
-# ScrollBar(canvas1, bgColour=(255,250,250), objectSize=(5,10))
-# Canvas(screen1, parent=canvas1, objectSize=(10,10), objectPosition=(150,150), bgColour=(255,0,0))
 
-# 2
-# canvas2 = Canvas(screen1, isMoveable=False, objectPosition=(400,100))
-# label4 = Label( '!', (255,0,0), parent=canvas2, identifier='!')
-# label5 = Label('World', (255,0,0), parent=label4, identifier='World')
-# label6 = Label('Hello', (255,0,0), parent=label5, identifier='Hello')
-# ScrollBar(canvas2, bgColour=(255,250,250), objectSize=(5,10))
+'''
+Example 1 is going to be alot easier once each object has its own dictionary of 
+objects types attached to it including the objects attached children
 
+example: 
 
-label4 = Label( '!', (255,0,0), ui=screen1, identifier='!', objectPosition=(100, 130))
+objectTypeList = {
+    'Label' : [list of every Label object attached]
+}
+the code below would just be 
+for label in canvas2.objectTypeList['Label']:
+    label.object.x = label.parent.object.topleft[0]
+    label.object.y = label.parent.object.topleft[1] - label.object.h
+'''
+# 1 : example of maipulating ui objects 
+def positon(*labels):
+    for label in labels:
+        if label.parent:
+            label.object.x = label.parent.object.topleft[0]
+            label.object.y = label.parent.object.topleft[1] - label.object.h
+
+canvas2 = Canvas(screen1, isMoveable=False, objectPosition=(400,100), isVisible=True)
+label4 = Label( '!', (255,0,0), parent=canvas2, identifier='!')
 label5 = Label('World', (255,0,0), parent=label4, identifier='World')
 label6 = Label('Hello', (255,0,0), parent=label5, identifier='Hello')
+ScrollBar(canvas2, bgColour=(255,250,250), objectSize=(5,10))
+positon(label4, label5, label6)
+####
 
-b = Button(event=None, eventArgs=None, child=label4, text='Howdy', textColour=(255,0,0), ui=screen1, objectPosition=(100,90))
-
-# container = Container(screen1)
-# container.childObjects.append(canvas1)
+# 2 : example of using objects to create a new object [Drop down menu]
+c = Container(screen1, isVisible=True)
+w = Canvas(None, parent=c, objectSize=(55,45), objectPosition=(100,105),isMoveable=False)
+label4 = Label('NOTHING', (255,0,0),parent=w, objectPosition=(100, 135))
+label5 = Label('DO', (255,0,0), parent=label4,objectPosition=(100, 120))
+label6 = Label('I', (255,0,0), parent=label5,objectPosition=(100, 105))
+b = Button(event=None, eventArgs=None, child=w, text='Click Me', textColour=(255,0,0), parent=c, objectPosition=(100,90))
+####
 
 run = True
 while run:
     screen.fill((0,0,0))
 
-    pygame.display.set_caption(f'UI TEST FPS({round(clock.get_fps())}) Parent Objects({screen1.numbParentObjs}) Child Objects({screen1.numbChildObjs})')
+    pygame.display.set_caption(f'UI TEST FPS({round(clock.get_fps())}) Container Objects({screen1.numbContainers}) Parent Objects({screen1.numbParentObjs}) Child Objects({screen1.numbChildObjs})')
 
     screen1.threaded_cycle()
 

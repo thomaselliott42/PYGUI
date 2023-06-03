@@ -12,6 +12,9 @@ TODO
 - Add anchors for objects to be anchored to other objects doesn't have to be ui object so can be item in a game just need the anchors position and other information if needed such as its width 
 - Add Select menu 
 - Need to move all rendering code into ui file 
+- When checking for collision return the current collided object
+
+- Add child list to every object which is a dic containg children and sub children on object split by type
 
 FEATURES  
 - Animation add a way for objects to be animated 

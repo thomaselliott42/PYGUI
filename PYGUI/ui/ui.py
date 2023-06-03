@@ -29,6 +29,7 @@ class UImanager:
 
         # DEBUG
         self.numbParentObjs = 0
+        self.numbContainers = 0
         self.numbChildObjs = 0
 
 
@@ -36,6 +37,7 @@ class UImanager:
     def ui_cycle(self):
         self.numbChildObjs = 0
         self.numbParentObjs = 0
+        self.numbContainers = 0
         if self.objectQueue:
             self.ui_render()
             return self.ui_collisions()
@@ -44,10 +46,10 @@ class UImanager:
     # Only Renders 
     def ui_render(self):
         self.numbChildObjs = 0
-        self.render_objects()
+        self.render_cycle()
     
 
-    # Only Checks for collision
+    # Only Checks for collision, not threaded 
     def ui_collisions(self):
         return self.check_mouse_collisions()
 
@@ -61,25 +63,36 @@ class UImanager:
     3. check child objects -> [class] ....
 
     4. if child objects call function again 
-    
-
     '''
-    def render_objects(self, objectQueue=None):
+    def check_child_objects(self, function, object):
+        if object.childObjects:
+            function(object.childObjects)
+
+
+    def render_objects(self, object, type):
+        for obj in object.objects[type]:
+            if type == 'rectangle':
+                self.renderer.render_rectangle(object.bgColour, obj)
+            elif type == 'text':
+                self.renderer.render_single_object(obj, (object.object.x, object.object.y))
+            elif type == 'image':
+                pass
+
+
+    def render_cycle(self, objectQueue=None):
         if not objectQueue:
             objectQueue = self.objectQueue
 
         for object in objectQueue:
-            if object.isVisible:
+            if object.__class__ == Container:
+                if object.isVisible:
+                    self.check_child_objects(self.render_cycle, object)
+            elif object.isVisible:
+                self.numbChildObjs += 1
                 for type in object.objects:
-                    for obj in object.objects[type]:
-                        if type == 'rectangle':
-                            self.renderer.render_rectangle(object.bgColour, obj)
-                        elif type == 'text':
-                            self.renderer.render_single_object(obj, (object.object.x, object.object.y))
-                if object.childObjects:
-                    self.numbChildObjs += len(object.childObjects)
-                    self.render_objects(object.childObjects)
-       
+                    self.render_objects(object, type)
+                self.check_child_objects(self.render_cycle, object)
+               
 
     def threaded_cycle(self):
         self.cA = None
@@ -99,9 +112,10 @@ class UImanager:
     def thread_test_thingy(self):
         self.threads = []
         self.numbParentObjs = 0
+        self.numbContainers = 0
 
         for object in self.objectQueue:
-            x = threading.Thread(target=self.thread_test_thingy2, args=(object, 1))
+            x = threading.Thread(target=self.need_name, args=(object,))
             self.threads.append(x)
             x.start()
 
@@ -109,47 +123,44 @@ class UImanager:
             thread.join()
     
 
-    # add return back 
-    def thread_test_thingy2(self, objectQueue, s):
-        if not s:
-            objectQueue.reverse()
-            for object in objectQueue:
-                if object.isVisible:
-                    for type in object.objects:
-                        for obj in object.objects[type]:
-                            if type == 'rectangle':
-                                if object.check_mouse_collision(obj):
-                                    if self.debug:
-                                        object.bgColour = (170, 255, 0)
-                                    self.cA = object 
-                                else:
-                                    if self.debug:
-                                        object.bgColour = object.ogColour
-                            
-                    if object.childObjects:
-                        self.thread_test_thingy2(object.childObjects, 0)
-                               
-                # if object.childObjects:
-                #     self.thread_test_thingy2(object.childObjects, 0)
-        else:
-            self.numbParentObjs += 1
-            for type in objectQueue.objects:
-                if objectQueue.isVisible:
-                    for obj in objectQueue.objects[type]:
+    def thread_test_thingy2(self, objectQueue):
+        objectQueue.reverse()
+        for object in objectQueue:
+            if object.isVisible:
+                for type in object.objects:
+                    for obj in object.objects[type]:
                         if type == 'rectangle':
-                            if objectQueue.check_mouse_collision(obj):
+                            if object.check_mouse_collision(obj):
                                 if self.debug:
-                                    objectQueue.bgColour = (170, 255, 0)
-                                self.cA = objectQueue 
-                            else:
+                                    object.bgColour = (255,192,203)
+                                self.cA = object 
+                            elif self.debug:
+                                object.bgColour = object.ogColour
+
+                self.check_child_objects(self.thread_test_thingy2, object)
+        objectQueue.reverse()
+
+
+    def need_name(self, object):
+        if object.__class__ == Container:
+            if object.isVisible:
+                self.numbContainers += 1
+                self.check_child_objects(self.thread_test_thingy2, object)
+        else:
+            if object.isVisible:
+                self.numbParentObjs += 1
+                for type in object.objects:
+                    for obj in object.objects[type]:
+                        if type == 'rectangle':
+                            if object.check_mouse_collision(obj):
                                 if self.debug:
-                                    objectQueue.bgColour = objectQueue.ogColour
-                        
-                    if objectQueue.childObjects:
-                        self.thread_test_thingy2(objectQueue.childObjects, 0)
-                # if objectQueue.childObjects:
-                #     self.thread_test_thingy2(objectQueue.childObjects, 0)
-      
+                                    object.bgColour = (170, 255, 0)
+                                self.cA = object 
+                            elif self.debug:
+                                object.bgColour = object.ogColour
+                                
+                    self.check_child_objects(self.thread_test_thingy2, object)
+
 
     # non threaded collision checking 
     def check_mouse_collisions(self, objectQueue=None):
@@ -181,10 +192,14 @@ class UImanager:
 
 # This is how ui objects are grouped together, this is where the screen is initialised i.e ui manager 
 class Container:
-    def __init__(self, ui):
+    def __init__(self, ui, isVisible):
         self.ui = ui
         self.childObjects = []
         self.ui.objectQueue.append(self)
+        self.isVisible = isVisible
+
+        # testing, used for anchoring in the future maybe 
+        self.objectPosition = (100,100)
         
 
 # Parent Class for every UI object 
@@ -245,14 +260,18 @@ class Canvas(UIobjects):
         self.ui = ui
 
         if self.parent:
+            if self.parent.__class__ == Container:
+                self.uiScreen = self.parent.ui.screen.get_rect()
             self.parent.childObjects.append(self)
         else:
+            self.uiScreen = self.ui.screen.get_rect()
             self.ui.objectQueue.append(self)
     
 
     def transform(self, rel):
         self.object.move_ip(rel)
-        self.object.clamp_ip(self.ui.screen.get_rect())
+
+        self.object.clamp_ip(self.uiScreen)
 
         if self.childObjects:
             self.transformChildren(self.childObjects, rel)
@@ -265,7 +284,7 @@ class Canvas(UIobjects):
                     if type == 'rectangle':
                      
                         obj.move_ip(rel)
-                        obj.clamp_ip(self.ui.screen.get_rect())
+                        obj.clamp_ip(self.uiScreen)
 
                                 
             if object.childObjects:
@@ -283,7 +302,6 @@ class Canvas(UIobjects):
                 return False
         return True
             
-        
     def create_collision_boxes(self):
         pass
 
@@ -299,13 +317,11 @@ class Label(UIobjects):
         self.object.w = self.get_width(text)
         self.object.h = self.font.get_height()
 
-        if self.parent:
-            # make it so it checks if item in position then moves it 
-            self.object.x = self.parent.object.topleft[0]
-            self.object.y = self.parent.object.topleft[1] - self.object.h
-
         self.textObject = self.font.render(text, True, textColour)
         self.objects['text'].append(self.textObject)
+
+        if not self.identifier:
+            self.identifier = text
 
         if self.parent:
             self.parent.childObjects.append(self)
@@ -363,6 +379,7 @@ NOT HOW BUTOTN IS GOING TO WORK
 class Button(Tab):
     def __init__(self, event, eventArgs, *args, **kwargs):
         super(Button, self).__init__(*args, **kwargs)
+        self.childObjects = []
         
     
     def set_visible(self) -> None:
