@@ -16,6 +16,7 @@ TODO
 - When checking for collision return the current collided object
 - Add child list to every object which is a dic containg children and sub children on object split by type
 - Split up the screen into sections and thread the rendering 
+- Add icon support 
 
 FEATURES  
 - Animation add a way for objects to be animated 
