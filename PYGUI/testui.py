@@ -48,13 +48,31 @@ ScrollBar(canvas2, bgColour=(255,250,250), objectSize=(5,10))
 positon(label4, label5, label6)
 ####
 
-# 2 : example of using objects to create a new object [Drop down menu]
-c = Container(screen1, isVisible=True)
-w = Canvas(None, parent=c, objectSize=(55,45), objectPosition=(100,105),isMoveable=False)
-label4 = Label('NOTHING', (255,0,0),parent=w, objectPosition=(100, 135))
-label5 = Label('DO', (255,0,0), parent=label4,objectPosition=(100, 120))
-label6 = Label('I', (255,0,0), parent=label5,objectPosition=(100, 105))
-b = Button(event=None, eventArgs=None, child=w, text='Click Me', textColour=(255,0,0), parent=c, objectPosition=(100,90))
+# 2 : example of using objects to create a new object and ui manipulation [Drop down menu]
+def update_canvas_scale(canvas, *labels):
+
+    canvas.object.w = 0
+    for width in [label.object.w for label in labels]:
+        canvas.object.w += width
+    canvas.object.w += 10
+
+    canvas.object.h = 0
+    for height in [label.object.h for label in labels]:
+        canvas.object.h += height
+    canvas.object.h += len(labels)*5
+
+
+c = Container(screen1)
+canvas = Canvas(None, parent=c, objectSize=(55,45), objectPosition=(100,105),isMoveable=False)
+label1 = Label('I', (255,0,0), parent=canvas, objectPosition=(100, 180))
+label2 = Label('DO', (255,0,0), parent=label1, objectPosition=(100, 165))
+label3 = Label('OR', (255,0,0), parent=label2, objectPosition=(100, 150))
+label4 = Label('NOTHING', (255,0,0), parent=label3, objectPosition=(100, 135))
+label5 = Label('DO', (255,0,0), parent=label4, objectPosition=(100, 120))
+label6 = Label('I', (255,0,0), parent=label5, objectPosition=(100, 105))
+b = Button(event=None, eventArgs=[], child=canvas, text='Click Me', textColour=(255,0,0), parent=c, objectPosition=(100,90))
+
+update_canvas_scale(canvas, label1, label2, label3, label4, label5, label6)
 ####
 
 run = True
@@ -63,15 +81,22 @@ while run:
 
     pygame.display.set_caption(f'UI TEST FPS({round(clock.get_fps())}) Container Objects({screen1.numbContainers}) Parent Objects({screen1.numbParentObjs}) Child Objects({screen1.numbChildObjs})')
 
-    screen1.update_ui()
+    events = pygame.event.get()
 
-    for event in pygame.event.get():
+    for event in events:
         if event.type == pygame.QUIT:  
             run = False
     
         if event.type == pygame.KEYDOWN:
-            pass
-            
+
+            # DEBUG
+            # switches between threaded and non threaded collison detectiono
+            if pygame.key.get_pressed()[pygame.K_c]:
+                screen1.threadedCollisionDetection = not(screen1.threadedCollisionDetection)
+                print(screen1.threadedCollisionDetection )
+
+    screen1.update_ui(events)
+
     pygame.display.flip()
     clock.tick(60)
 
