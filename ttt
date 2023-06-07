@@ -1,0 +1,85 @@
+IN PROGRESS 
+- Reworking ui so more modular and streamlined 
+- Figure out child objects transform issue 
+- Sort out rendering so that current object selected rendered ontop
+- Fixing debug colour change for when an object thats not being targated during collision check but is underneath 
+  the object being targeted has its colour changed 
+- Reworking way that children and objects are handled 
+
+TODO
+- Need to make it so that when an action is taking place if mouse is down only when it is up again is it stopped 
+- Added radial menu support 
+- Top layer ordering and proper z order 
+- Add popups which when clicked off dismiss 
+- Add anchors for objects to be anchored to other objects doesn't have to be ui object so can be item in a game just need the anchors position and other information if needed such as its width 
+- Need to move all rendering code into ui file 
+- When checking for collision return the current collided object
+- Add child list to every object which is a dic containg children and sub children on object split by type
+- Add sprite / image support for canvases / backgrounds 
+- use regular expressions to read the scripting language and translate it to pyhton
+
+FEATURES  
+- Animation add a way for objects to be animated 
+- Text wrap 
+- Make a .ui file where you can define the screen and widgets and buttons in the file without the need for code 
+
+Interesting watch: 
+https://youtu.be/buChHSdsF9A
+
+Example with intergrated text:
+
+screen 1 
+  size : x, y 
+  tabs :
+    position : 
+    widget : w1
+      text :
+        <head>
+        <title>Bartender<title>
+        <head>
+        <body>
+        <p>
+        Heres your drink, 
+        That'll be 10$
+        <p>
+        <button>b1<button>
+        <body>      
+    button : b1 
+      data
+screen 1 /
+
+Example without intergrated text:
+
+screen 1 
+  size : x, y 
+  tabs :
+    position : 
+    widget : w1
+      text file : path
+      text : <demo>
+    button : b1 
+      data
+screen 1 /
+
+######
+
+pagename:paragraph {
+  size : ... ;
+  font : ... ;
+  margin : ... ;
+   ...
+}
+
+######
+
+###### Nesting
+
+.card {
+  bgColour : var()
+
+  &:hover {
+    bgColour : var()
+  }
+}
+
+######
