@@ -1,3 +1,66 @@
+Break into lines then into lists go list by list pointer to store position and checking conditions 
+Depending what thing is can get handed off to different processes 
+
+
+Example with intergrated text:
+
+screen 1 
+  size : x, y 
+  tabs :
+    position : 
+    widget : w1
+      text :
+        <head>
+        <title>Bartender<title>
+        <head>
+        <body>
+        <p>
+        Heres your drink, 
+        That'll be 10$
+        <p>
+        <button>b1<button>
+        <body>      
+    button : b1 
+      data
+screen 1 /
+
+Example without intergrated text:
+
+screen 1 
+  size : x, y 
+  tabs :
+    position : 
+    widget : w1
+      text file : path
+      text : <demo>
+    button : b1 
+      data
+screen 1 /
+
+######
+
+pagename:paragraph {
+  size : ... ;
+  font : ... ;
+  margin : ... ;
+   ...
+}
+
+######
+
+###### Nesting
+
+.card {
+  bgColour : var()
+
+  &:hover {
+    bgColour : var()
+  }
+}
+
+######
+
+
 identifier // this is used to group containers together such as HUD and INVENTORY would be identifiers 
   window size : x, y 
   

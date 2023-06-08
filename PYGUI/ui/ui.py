@@ -1,5 +1,6 @@
 import pygame 
 import threading
+import multiprocessing
 import os 
 import math 
 
@@ -28,6 +29,7 @@ class UImanager:
         self.threadedCollisionDetection = threadedCollisionDetection
 
         # DEBUG
+        self.isMultiprocessing = False
         self.numbParentObjs = 0
         self.numbContainers = 0
         self.numbChildObjs = 0
@@ -111,16 +113,27 @@ class UImanager:
 
     def check_mouse_collision_threaded(self):
         self.threads = []
+        self.multiprocessing = []
         self.numbParentObjs = 0
         self.numbContainers = 0
 
-        for object in self.objectQueue:
-            x = threading.Thread(target=self.check_mouse_object_collision_threaded, args=(object,))
-            self.threads.append(x)
-            x.start()
+        # multiprocessing
+        if self.isMultiprocessing:
+            for object in self.objectQueue:
+                p = multiprocessing.Process(target=self.check_mouse_object_collision_threaded, args=(object,))
+                self.multiprocessing.append(p)
+                p.start()
+            
+            for process in self.multiprocessing:
+                process.join()
+        else:
+            for object in self.objectQueue:
+                x = threading.Thread(target=self.check_mouse_object_collision_threaded, args=(object,))
+                self.threads.append(x)
+                x.start()
 
-        for index, thread in enumerate(self.threads):
-            thread.join()
+            for index, thread in enumerate(self.threads):
+                thread.join()
     
 
     def check_collision(self, object, type):
@@ -363,10 +376,12 @@ class ScrollBar(UIobjects):
 class Tab(Label):
     def __init__(self, child, *args, **kwargs):
         super(Tab, self).__init__(*args, **kwargs)
+
         self.child = child
-        if child != self.parent:
-            self.child.isVisible = False
-            self.childObjects.append(self.child)
+        if child:
+            if child != self.parent:
+                self.child.isVisible = False
+                self.childObjects.append(self.child)
         # self.angleSin = 0
         # self.angleCos = 0
 

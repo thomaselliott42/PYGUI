@@ -16,12 +16,11 @@ TODO
 - When checking for collision return the current collided object
 - Add child list to every object which is a dic containg children and sub children on object split by type
 - Add sprite / image support for canvases / backgrounds 
-- use regular expressions to read the scripting language and translate it to pyhton
-
-FEATURES  
+- Some objects hold data or read data from game to be displayed (i.e dynamic text/ updates)  
 - Animation add a way for objects to be animated 
 - Text wrap 
-- Make a .ui file where you can define the screen and widgets and buttons in the file without the need for code 
+- Make a .ui file where you can define the screen and widgets and buttons in the file without the need for code
+- Work on Multiprocessing  
 
 Interesting watch: 
 https://youtu.be/buChHSdsF9A

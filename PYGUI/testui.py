@@ -75,6 +75,18 @@ b = Button(event=None, eventArgs=[], child=canvas, text='Click Me', textColour=(
 update_canvas_scale(canvas, label1, label2, label3, label4, label5, label6)
 ####
 
+
+# 3 : project zomboid like inventory example 
+
+inventoryContainer = Container(screen1)
+canvas = Canvas(None, parent=inventoryContainer, objectSize=(100,45), objectPosition=(100,0),isMoveable=True)
+canvas2 = Canvas(None, parent=canvas, objectSize=(100,100), objectPosition=(100,0),isMoveable=True)
+buttonOpen = Button(event=None, eventArgs=[], child=canvas2, text='Bobs Inventory', textColour=(255,0,0), parent=canvas, objectPosition=(100,0))
+canvas.object.h = buttonOpen.object.h 
+
+
+
+
 run = True
 while run:
     screen.fill((0,0,0))
