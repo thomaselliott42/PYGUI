@@ -302,7 +302,6 @@ class Canvas(UIobjects):
     def __init__(self, ui, *args, **kwargs):
         super(Canvas, self).__init__(*args, **kwargs)
         self.ui = ui
-        self.type = 'Canvas'
         if self.parent:
             if self.parent.__class__ == Container:
                 self.uiScreen = self.parent.ui.screen.get_rect()
@@ -361,7 +360,6 @@ class Label(UIobjects):
         self.ui = ui
         self.object.w = self.get_width(text)
         self.object.h = self.font.get_height()
-        self.type = 'Label'
 
         self.text = text
         self.textColour = textColour
@@ -398,7 +396,6 @@ class Label(UIobjects):
 class ScrollBar(UIobjects):
     def __init__(self, parent, *args, **kwargs):
         super(ScrollBar, self).__init__(*args, **kwargs)
-        self.type = 'ScrollBar'
 
         self.object.h = parent.object.h 
 
@@ -421,7 +418,6 @@ class ScrollBar(UIobjects):
 class Tab(Label):
     def __init__(self, child, *args, **kwargs):
         super(Tab, self).__init__(*args, **kwargs)
-        self.type = 'Tab'
 
         self.child = child
         if child:
