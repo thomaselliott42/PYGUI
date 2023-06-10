@@ -79,13 +79,14 @@ update_canvas_scale(canvas, label1, label2, label3, label4, label5, label6)
 # 3 : project zomboid like inventory example 
 
 inventoryContainer = Container(screen1)
-canvas = Canvas(None, parent=inventoryContainer, objectSize=(100,45), objectPosition=(100,0),isMoveable=True)
-canvas2 = Canvas(None, parent=canvas, objectSize=(100,100), objectPosition=(100,0),isMoveable=True)
+canvas = Canvas(None, parent=inventoryContainer, objectSize=(100,45), objectPosition=(100,0),isMoveable=True, identifier='canvas1')
+canvas2 = Canvas(None, parent=canvas, objectSize=(100,100), objectPosition=(100,0),isMoveable=True, identifier='canvas2')
 buttonOpen = Button(event=None, eventArgs=[], child=canvas2, text='Bobs Inventory', textColour=(255,0,0), parent=canvas, objectPosition=(100,0))
+c3 = Canvas(None, parent=canvas2, objectSize=(100,100), objectPosition=(100,0),isVisible=False, identifier='canvas3')
+Canvas(None, parent=c3, objectSize=(100,100), objectPosition=(100,0),isVisible=False, identifier='canvas4')
 canvas.object.h = buttonOpen.object.h 
 
-
-
+print(canvas2.attachedObjects)
 
 run = True
 while run:
@@ -94,6 +95,7 @@ while run:
     pygame.display.set_caption(f'UI TEST FPS({round(clock.get_fps())}) Container Objects({screen1.numbContainers}) Parent Objects({screen1.numbParentObjs}) Child Objects({screen1.numbChildObjs})')
 
     events = pygame.event.get()
+
 
     for event in events:
         if event.type == pygame.QUIT:  

@@ -2,3 +2,6 @@ Scripting language contains both the structure and style,  how and object is to 
 
 
 CONTENT + STRUCTURE {DESIGN + DISPLAY}
+
+Break into lines then into lists go list by list pointer to store position and checking conditions 
+Depending what thing is can get handed off to different processes 

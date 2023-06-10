@@ -193,15 +193,37 @@ class UImanager:
           
 # This is how ui objects are grouped together, this is where the screen is initialised i.e ui manager 
 class Container:
-    def __init__(self, ui, isVisible=True):
+    def __init__(self, ui, isVisible=True, isGrouped=False):
         self.ui = ui
         self.childObjects = []
         self.ui.objectQueue.append(self)
         self.isVisible = isVisible
+        self.isGrouped = isGrouped
+        self.attachedObjects = {}
+
 
         # testing, used for anchoring in the future maybe 
         self.objectPosition = (100,100)
+    
+
+    def add_object_to_children(self, object): 
+        self.childObjects.append(object)
+        self.updateAttachedObjects(object)
         
+        if self.isGrouped:
+            pass
+
+
+    def updateAttachedObjects(self, object):
+        if object.__class__.__name__ in self.attachedObjects:
+            if object not in self.attachedObjects[object.__class__.__name__]:
+                self.attachedObjects[object.__class__.__name__].append(object)
+        else:
+            self.attachedObjects[object.__class__.__name__] = [object]
+        
+        for childObject in object.childObjects:
+            self.updateAttachedObjects(childObject) 
+       
 
 # Parent Class for every UI object 
 class UIobjects:
@@ -232,7 +254,28 @@ class UIobjects:
 
         # list of ui objects  
         self.childObjects = []
+        self.attachedObjects = {}
     
+
+    def add_object_to_children(self, object): 
+        self.childObjects.append(object)
+        self.updateAttachedObjects(object)
+               
+
+    def updateAttachedObjects(self, object):
+       
+        if object.__class__.__name__ in self.attachedObjects:
+            if object not in self.attachedObjects[object.__class__.__name__]:
+                self.attachedObjects[object.__class__.__name__].append(object)
+        else:
+            self.attachedObjects[object.__class__.__name__] = [object]
+        
+        for childObject in object.childObjects:
+            self.updateAttachedObjects(childObject) 
+
+        if self.parent:
+            self.parent.updateAttachedObjects(self)
+       
 
     def check_mouse_collision(self, obj):
         return obj.collidepoint(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
@@ -259,11 +302,11 @@ class Canvas(UIobjects):
     def __init__(self, ui, *args, **kwargs):
         super(Canvas, self).__init__(*args, **kwargs)
         self.ui = ui
-
+        self.type = 'Canvas'
         if self.parent:
             if self.parent.__class__ == Container:
                 self.uiScreen = self.parent.ui.screen.get_rect()
-            self.parent.childObjects.append(self)
+            self.parent.add_object_to_children(self)
         else:
             self.uiScreen = self.ui.screen.get_rect()
             self.ui.objectQueue.append(self)
@@ -318,6 +361,7 @@ class Label(UIobjects):
         self.ui = ui
         self.object.w = self.get_width(text)
         self.object.h = self.font.get_height()
+        self.type = 'Label'
 
         self.text = text
         self.textColour = textColour
@@ -333,7 +377,7 @@ class Label(UIobjects):
             self.identifier = text
 
         if self.parent:
-            self.parent.childObjects.append(self)
+            self.parent.add_object_to_children(self)
         else:
             self.ui.objectQueue.append(self)
     
@@ -354,6 +398,7 @@ class Label(UIobjects):
 class ScrollBar(UIobjects):
     def __init__(self, parent, *args, **kwargs):
         super(ScrollBar, self).__init__(*args, **kwargs)
+        self.type = 'ScrollBar'
 
         self.object.h = parent.object.h 
 
@@ -364,7 +409,7 @@ class ScrollBar(UIobjects):
         # self.objects['rectangle'].append(self.object2.object)
 
         self.parent = parent
-        self.parent.childObjects.append(self)
+        self.parent.add_object_to_children(self)
     
     
     def check_mouse_collision(self, obj):
@@ -376,12 +421,14 @@ class ScrollBar(UIobjects):
 class Tab(Label):
     def __init__(self, child, *args, **kwargs):
         super(Tab, self).__init__(*args, **kwargs)
+        self.type = 'Tab'
 
         self.child = child
         if child:
             if child != self.parent:
                 self.child.isVisible = False
-                self.childObjects.append(self.child)
+                self.add_object_to_children(self.child)
+
         # self.angleSin = 0
         # self.angleCos = 0
 
