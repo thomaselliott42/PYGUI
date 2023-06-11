@@ -9,6 +9,8 @@ COMPLETED FIRST PASS:
 IN PROGRESS 
 - Reworking ui so more modular and streamlined 
 - Reworking way that children and objects are handled 
+- First pass on implementing an Icon object 
+
  
 TODO
 - Figure out child objects transform issue 
@@ -30,4 +32,9 @@ TODO
 - use regular expressions to read the scripting language and translate it to python
 - size to fit option in containers (specify size of container and then objects will fit inside it together, based on 
   first objects positon if non given)
+- Make it so identifiers can be passed as parents instead of requring a named variable  
+
+RESEARCH 
 - Work on Multiprocessing   https://docs.python.org/3/library/multiprocessing.html
+- Look into event-driven architecture 
+- Look into splitting actions out of objects to allow for objects to be made up of actions 

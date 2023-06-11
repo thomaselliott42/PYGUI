@@ -75,7 +75,7 @@ class UImanager:
             elif type == 'text':
                 self.renderer.render_single_object(obj, (object.object.x, object.object.y))
             elif type == 'image':
-                pass
+                self.renderer.render_single_object(obj, (object.object.x, object.object.y))
 
 
     def render_cycle(self, objectQueue=None):
@@ -83,6 +83,7 @@ class UImanager:
             objectQueue = self.objectQueue
 
         for object in objectQueue:
+           
             if object.__class__ == Container:
                 if object.isVisible:
                     self.check_child_objects(self.render_cycle, object)
@@ -201,7 +202,6 @@ class Container:
         self.isGrouped = isGrouped
         self.attachedObjects = {}
 
-
         # testing, used for anchoring in the future maybe 
         self.objectPosition = (100,100)
     
@@ -227,18 +227,25 @@ class Container:
 
 # Parent Class for every UI object 
 class UIobjects:
-    def __init__(self, objectPosition=(0,0), anchour=None, objectSize=(200,200), bgColour=(20, 50, 120),
+    def __init__(self, objectPosition=(0,0), anchour=None, objectSize=(200,200), backgroundImage=None, bgColour=(20, 50, 120),
                  font=pygame.font.Font(None, 16), parent=None, isVisible=True, isMoveable=True, identifier=None):
-        self.object = pygame.Rect(objectPosition, objectSize)
 
         self.objects = {
             'rectangle' : [],
-            'text' : [],
-            'image' : []
+            'image' : [],
+            'text' : []
         }
 
+       
+        self.object = pygame.Rect(objectPosition, objectSize)
         self.objects['rectangle'].append(self.object)
 
+        self.backgroundImage = None
+        if backgroundImage:
+            self.backgroundImage = pygame.transform.scale(backgroundImage, (self.object.w, self.object.h))
+            self.objects['image'].append(self.backgroundImage)
+
+      
         self.bgColour = bgColour
         self.font = font
         self.isMoveable = isMoveable
@@ -291,17 +298,28 @@ class UIobjects:
                
         return line_width
 
+
     def get_action(self, events):
         for event in events:
             if pygame.mouse.get_pressed()[0]:
                 print(self.identifier)
         return False
+    
+
+    def scale_image(self, targetImage):
+        position = self.objects['image'].index(targetImage)
+        self.objects['image'].pop(position)
+        targetImage = pygame.transform.scale(self.backgroundImage, (self.object.w, self.object.h))
+        self.objects['image'].insert(position, targetImage)
+
+
 
 
 class Canvas(UIobjects):
     def __init__(self, ui, *args, **kwargs):
         super(Canvas, self).__init__(*args, **kwargs)
         self.ui = ui
+
         if self.parent:
             if self.parent.__class__ == Container:
                 self.uiScreen = self.parent.ui.screen.get_rect()
@@ -318,7 +336,7 @@ class Canvas(UIobjects):
 
         if self.childObjects:
             self.transformChildren(self.childObjects, rel)
-        
+    
 
     def transformChildren(self, objectQueue, rel):
         for object in objectQueue:
@@ -378,8 +396,12 @@ class Label(UIobjects):
             self.parent.add_object_to_children(self)
         else:
             self.ui.objectQueue.append(self)
-    
 
+        # hack 
+        if self.backgroundImage:
+            self.scale_image(self.backgroundImage)
+        
+    
     def update_text(self, text, textColour=None):
         if textColour:
             self.textColour = textColour
@@ -393,26 +415,24 @@ class Label(UIobjects):
         self.object.h = self.font.get_height()
              
 
-class ScrollBar(UIobjects):
-    def __init__(self, parent, *args, **kwargs):
-        super(ScrollBar, self).__init__(*args, **kwargs)
+# class ScrollBar(UIobjects):
+#     def __init__(self, parent, *args, **kwargs):
+#         super(ScrollBar, self).__init__(*args, **kwargs)
 
-        self.object.h = parent.object.h 
+#         self.object.h = parent.object.h 
 
-        self.object.x = parent.object.topleft[0] - self.object.w
-        self.object.y = parent.object.topleft[1]
+#         self.object.x = parent.object.topleft[0] - self.object.w
+#         self.object.y = parent.object.topleft[1]
 
-        # self.object2 = Widget(None, parent=self, objectPosition=(self.object.x, self.object.y), objectSize=(self.object.w, 20), bgColour=(105,105,105), identifier='hello')
-        # self.objects['rectangle'].append(self.object2.object)
+#         # self.object2 = Widget(None, parent=self, objectPosition=(self.object.x, self.object.y), objectSize=(self.object.w, 20), bgColour=(105,105,105), identifier='hello')
+#         # self.objects['rectangle'].append(self.object2.object)
 
-        self.parent = parent
-        self.parent.add_object_to_children(self)
+#         self.parent = parent
+#         self.parent.add_object_to_children(self)
     
     
-    def check_mouse_collision(self, obj):
-        return obj.collidepoint(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
-
-
+#     def check_mouse_collision(self, obj):
+#         return obj.collidepoint(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
 
 
 class Tab(Label):
@@ -461,8 +481,16 @@ class Button(Tab):
         for event in events:
             if pygame.mouse.get_pressed()[0]:
                 self.set_visible()
-  
 
+
+class ImageHandler:
+    def __init__(self, image):
+        pass
+
+
+class Icon(UIobjects):
+    def __init__(self):
+        pass
 
 
 
