@@ -78,45 +78,51 @@ class UImanager:
                 self.renderer.render_single_object(obj, (object.object.x, object.object.y))
 
 
+    def render_call(self, object):
+        for type in object.objects:
+            self.render_objects(object, type)
+
+
     def render_cycle(self, objectQueue=None):
         if not objectQueue:
             objectQueue = self.objectQueue
 
         for object in objectQueue:
-           
-            if object.__class__ == Container:
-                if object.isVisible:
-                    self.check_child_objects(self.render_cycle, object)
-            elif object.isVisible:
+            if not object.isVisible:
+                pass
+
+            elif object.__class__ == Container:
+                self.check_child_objects(self.render_cycle, object)
+
+            else:
                 self.numbChildObjs += 1
-                for type in object.objects:
-                    self.render_objects(object, type)
+                self.render_call(object)
                 self.check_child_objects(self.render_cycle, object)
     
 
     # Renders and Checks the objects for mouse Collision
     def update_ui(self, events=[]):
-        self.cA = None
+        self.currentAction = None
         self.numbChildObjs = 0
 
         if self.objectQueue:
             self.ui_render()
             if self.actionInProgress:
-                self.actionInProgress = self.lastCA.get_action(events)
+                self.actionInProgress = self.lastAction.get_action(events)
 
             else:
                 self.ui_collisions()
 
-            if self.cA:
-                self.actionInProgress = self.cA.get_action(events)
-                self.lastCA = self.cA
+            if self.currentAction:
+                self.actionInProgress = self.currentAction.get_action(events)
+                self.lastAction = self.currentAction
 
 
     def check_mouse_collision_threaded(self):
         self.threads = []
         self.multiprocessing = []
-        self.numbParentObjs = 0
-        self.numbContainers = 0
+        self.numbParentObjs = 0 #Debug
+        self.numbContainers = 0 #Debug
 
         # multiprocessing
         if self.isMultiprocessing:
@@ -127,6 +133,7 @@ class UImanager:
             
             for process in self.multiprocessing:
                 process.join()
+
         else:
             for object in self.objectQueue:
                 x = threading.Thread(target=self.check_mouse_object_collision_threaded, args=(object,))
@@ -143,33 +150,37 @@ class UImanager:
                 if object.check_mouse_collision(obj):
                     if self.debug:
                         object.bgColour = (255,192,203)
-                    self.cA = object 
+                    self.currentAction = object 
                 elif self.debug:
                     object.bgColour = object.ogColour
+
+
+    def collision_call(self, object):
+        for type in object.objects:
+            self.check_collision(object, type)
 
 
     def check_mouse_child_collision_threaded(self, objectQueue):
         objectQueue.reverse()
         for object in objectQueue:
-           
             if object.isVisible:
-                for type in object.objects:
-                    self.check_collision(object, type)
+                self.collision_call(object)
                 self.check_child_objects(self.check_mouse_child_collision_threaded, object)
         objectQueue.reverse()
 
 
     def check_mouse_object_collision_threaded(self, object):
-        if object.__class__ == Container:
-            if object.isVisible:
-                self.numbContainers += 1
-                self.check_child_objects(self.check_mouse_child_collision_threaded, object)
+        if not object.isVisible:
+            pass
+
+        elif object.__class__ == Container:
+            self.numbContainers += 1 #Debug
+            self.check_child_objects(self.check_mouse_child_collision_threaded, object)
+        
         else:
-            if object.isVisible:
-                self.numbParentObjs += 1
-                for type in object.objects:
-                    self.check_collision(object, type)
-                self.check_child_objects(self.check_mouse_child_collision_threaded, object)
+            self.numbParentObjs += 1 #Debug
+            self.collision_call(object)
+            self.check_child_objects(self.check_mouse_child_collision_threaded, object)
 
 
     # non threaded collision checking 
@@ -180,13 +191,15 @@ class UImanager:
         objectQueue.reverse()
         
         for object in objectQueue:
-            if object.__class__ == Container:
-                if object.isVisible:
-                    self.numbContainers += 1
-                    self.check_child_objects(self.check_mouse_object_collision, object)
-            elif object.isVisible:
-                for type in object.objects:
-                    self.check_collision(object, type)
+            if not object.isVisible:
+                pass
+
+            elif object.__class__ == Container:
+                self.numbContainers += 1 #Debug
+                self.check_child_objects(self.check_mouse_object_collision, object)
+
+            else:
+                self.collision_call(object)
             self.check_child_objects(self.check_mouse_object_collision, object)
 
         objectQueue.reverse()
@@ -262,6 +275,9 @@ class UIobjects:
         # list of ui objects  
         self.childObjects = []
         self.attachedObjects = {}
+
+        # modified 
+        self.isModified = False
     
 
     def add_object_to_children(self, object): 
@@ -309,10 +325,40 @@ class UIobjects:
     def scale_image(self, targetImage):
         position = self.objects['image'].index(targetImage)
         self.objects['image'].pop(position)
-        targetImage = pygame.transform.scale(self.backgroundImage, (self.object.w, self.object.h))
+        targetImage = pygame.transform.scale(targetImage, (self.object.w, self.object.h))
         self.objects['image'].insert(position, targetImage)
+        self.backgroundImage = targetImage
 
 
+    ## Modification methods 
+    def set_height(self, newHeight):
+        self.object.h = newHeight
+        self.set_modified()
+
+
+    def update_height(self, change):
+        self.object.h += change
+        self.set_modified()
+
+        # HACK FOR TESTING 
+        self.scale_image(self.backgroundImage)
+
+
+    def set_width(self, newWidth):
+        self.object.w = newWidth
+        self.set_modified()
+
+
+    def update_width(self, change):
+        self.object.w += change
+        self.set_modified()
+
+        # HACK FOR TESTING 
+        self.scale_image(self.backgroundImage)
+
+
+    def set_modified(self, boolean=True):
+        self.isModified = boolean
 
 
 class Canvas(UIobjects):
@@ -385,7 +431,7 @@ class Label(UIobjects):
         self.textObject = self.font.render(self.text, True, self.textColour)
         self.objects['text'].append(self.textObject)
 
-        # hack for now
+        # HACK super nasty for now
         if not isTextBackgroundVisible:
             self.objects['rectangle'] = []
 
@@ -483,14 +529,6 @@ class Button(Tab):
                 self.set_visible()
 
 
-class ImageHandler:
-    def __init__(self, image):
-        pass
-
-
-class Icon(UIobjects):
-    def __init__(self):
-        pass
 
 
 

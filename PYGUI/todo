@@ -6,13 +6,19 @@ COMPLETED FIRST PASS:
   }
   This is populated from child objects so if a child has children they will be added as well but not parents  
 
+
 IN PROGRESS 
+- Impementing children scaling and changing if parent has been modified 
 - Reworking ui so more modular and streamlined 
 - Reworking way that children and objects are handled 
-- First pass on implementing an Icon object 
+- Implement foundation for an Icon object 
 
  
 TODO
+- Sort out nasty HACK in Label
+- Impement object targeting for scaling and changing 
+- isModified attribute used in UI screen to update child or image scales then reset to False or could just have an update image method that  designer can call
+- Objects that have been modified get added to a list so can itterate specifically over them
 - Figure out child objects transform issue 
 - Sort out rendering so that current object selected rendered ontop
 - Fixing debug colour change for when an object thats not being targated during collision check but is underneath 
